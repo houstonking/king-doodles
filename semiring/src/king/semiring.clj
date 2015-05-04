@@ -1,74 +1,50 @@
-(ns king.semiring
-  (:require [schema.core :as s])
-  )
+(ns king.semirings
+  (:require [schema.core :as s]))
 
-(defprotocol IBooleanOperation
-  (op [x y] "Defines the behavior of 'x op y'"))
+(s/defrecord Semigroup [member?
+                        op
+                        commutative?])
+(s/defrecord Monoid [member?
+                     op
+                     id
+                     commutative?])
+(s/defrecord Group [member?
+                    op
+                    id
+                    inverse
+                    commutative?])
 
-(defprotocol IIsCommutative
-  (commutative? [this] "True if the operation commutes"))
+(s/defrecord Semiring [plus-monoid
+                       times-monoid
+                       commutative?])
 
-(defprotocol IIsAssociative
-  (is-associative? [this] "True if the operation is associative"))
+(defn semiring [plus times]
+  (let [commutative? (and (:id plus)
+                          (:id times)
+                          (:commutative? plus)
+                          (:commutative? times))]
+    (map->Semiring {:plus-monoid plus
+                    :times-monoid times
+                    :commutative? commutative?})
+    ))
 
-(defprotocol IIdentity
-  (identity-element [this] "Returns the identity element for the object"))
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(defprotocol IHasInverses
-  (has-inverses? [this] "Returns true if the object is invertible"))
+(defn boolean? [x]
+  (= (type x) Boolean))
 
-(defprotocol IIsMember
-  (is-member? [this x] "Returns true if x is in this"))
+(def BooleanOr (->Group boolean?
+                        (fn [x y] (or x y))
+                        false
+                        not
+                        true
+                        ))
 
+(def BooleanAnd (->Group boolean?
+                         (fn [x y] (and x y))
+                         true
+                         not
+                         true
+                         ))
 
-(defn monoid? [obj]
-  (assert (satisfies? obj IIsMember))
-  (assert (satisfies? obj IIsAssociative))
-  (assert (satisfies? obj IIdentity))
-  (assert (and (closed? obj)
-               (is-associative? obj)
-               (identity-element obj))))
-
-(defn commutative-monoid? [obj]
-  (assert (satisfies? obj IIsCommutative))
-  (assert (monoid? obj))
-  (assert (commutative? obj)))
-
-(s/defschema Monoid (s/pred monoid?))
-
-(s/defschema CommutativeMonoid (s/pred commutative-monoid?))
-
-(deftype BooleanOrMonoid []
-  IBooleanOperation
-  (op [x y] (or x y))
-
-  IIsMember
-  (is-member? [_ x] (= Boolean (type x)))
-
-  IIsAssociative
-  (is-associative? [_] true)
-
-  IIs
-  )
-
-
-(s/defrecord Semiring
-    [add :- CommutativeMonoid
-     times :- Monoid])
-
-(s/defn semiring [opts]
-  (map->Semiring opts))
-
-(defn has-detector?
-  "Element x in R is a 'detector' if x is both:
-   1) The absorbing element of *
-   2) The identity element of +
-   Detecting elements can be used to perform domain
-   shrinking (e.g. Arc Consistency in CSP)"
-  [sr] )
-
-
-
-
-(def BooleanSR
-  )
+(def BooleanOrAnd (semiring BooleanOr BooleanAnd))
