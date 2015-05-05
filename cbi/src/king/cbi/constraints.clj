@@ -51,3 +51,10 @@
                                     (apply #(merge m %) {(:name var) s}))]
                    (reduce op id (map (partial calculate constraint) sub-states))))]
     (map->Constraint {:scope new-scope :function new-fn})))
+
+
+(s/defn marginalize-all :- Constraint
+  [sr :- Semiring
+   constraint :- Constraint
+   vars :- [Variable]]
+  (reduce (partial marginalize sr) constraint vars ))
