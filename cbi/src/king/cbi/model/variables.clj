@@ -1,4 +1,4 @@
-(ns king.cbi.variables
+(ns king.cbi.model.variables
   (:require [schema.core :as s]
             )
   )
@@ -14,9 +14,7 @@
 
 (defmethod print-method Variable
   [o w]
-  (print-simple (str "var" (:name o)) w)
-  )
-
+  (print-simple (str "var" (:name o)) w))
 
 (s/defn state-assignment [vars :- [Variable]
                           states :- [s/Any]]

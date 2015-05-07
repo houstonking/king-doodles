@@ -1,29 +1,19 @@
-(ns king.cbi.constraints
+(ns king.cbi.ops
   (:require [schema.core :as s]
-
-            [king.cbi.variables :refer [states]]
-            [king.semirings :refer [times plus plus-identity]]
-
             [clojure.set :refer [intersection union difference]]
+            [clojure.math.combinatorics :refer [cartesian-product]]
 
-            [taoensso.timbre :refer [spy debug]])
-  (:import [king.cbi.variables
-            Variable]
-           [king.semirings
-            Semiring]
-           ))
+            [king.cbi.model.constraints :refer :all]
+            [king.cbi.model.variables :refer :all]
+            [king.semirings :refer :all]
 
+            [taoensso.timbre :refer [spy debug]]
+            )
 
-
-(s/defrecord Constraint
-    [scope :- #{Variable}
-     function])
-
-(s/defn constraint [scope function]
-  (map->Constraint {:scope scope :function function}))
-
-(s/defn scope [cst]
-  (:scope cst))
+  (:import [king.cbi.model.constraints Constraint]
+           [king.cbi.model.variables Variable]
+           [king.semirings Semiring])
+  )
 
 (s/defn calculate [cst xs]
   ((:function cst) xs))
@@ -32,6 +22,7 @@
   [cst :- Constraint
    xs]
   (let [new-scope (->> (scope cst)
+                       ;; { x \in scope | x \not\in xs }
                        (filter (fn [v] (not (contains? (into #{} (keys xs)) (:name v)))  ))
                        (into #{}))
         new-fn (fn [m] (calculate cst (merge m xs)))]
@@ -73,8 +64,15 @@
    vars :- [Variable]]
   (reduce (partial marginalize sr) constraint vars ))
 
-
-(s/defrecord CBIProblem [variables :- [Variable]
-                         domains :-
-                         semiring
-                         constraints])
+;; Returns a lazy seq of all [assignment value] pairs for the given
+;; constraint
+(s/defn calculate-all-states
+  [cst]
+  (let [vars (scope cst)
+        domains (for [v vars]
+                  (for [state (states v)]
+                    {(:name v) state}))
+        assigns (map #(into {} %) (apply cartesian-product domains))]
+    (for [assign assigns]
+      [assign (calculate cst assign)]
+      )))

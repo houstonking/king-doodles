@@ -3,4 +3,5 @@
   :dependencies [[org.clojure/clojure "1.6.0"]
                  [prismatic/schema _]
                  [prismatic/plumbing _]
-                 [king/semiring _]])
+                 [king/semiring _]
+                 [org.clojure/math.combinatorics "0.1.1"]])
