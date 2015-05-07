@@ -13,15 +13,22 @@
 
 (def bool (make-discrete-domain [true false]))
 
+(def w (variable :w bool))
+
 (def x (variable :x bool))
 
 (def y (variable :y bool))
 
 (def z (variable :z bool))
 
-(def x-and-y (constraint #{x y} (fnk [x y] (and x y))))
+(def w-and-x (constraint #{w x}
+                         (fnk [w x] (and w x))))
 
-(def y-and-z (constraint #{y z} (fnk [y z] (and y z))))
+(def x-and-y (constraint #{x y}
+                         (fnk [x y] (and x y))))
+
+(def y-and-z (constraint #{y z}
+                         (fnk [y z] (and y z))))
 
 (def x-and-y-*and*-y-and-z (combine bool-under-or-and
                                     x-and-y

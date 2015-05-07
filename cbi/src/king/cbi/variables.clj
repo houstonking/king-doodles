@@ -14,7 +14,7 @@
 
 (defmethod print-method Variable
   [o w]
-  (print-simple (str (:name o)) w)
+  (print-simple (str "var" (:name o)) w)
   )
 
 

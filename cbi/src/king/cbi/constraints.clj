@@ -13,19 +13,29 @@
             Semiring]
            ))
 
+
+
 (s/defrecord Constraint
     [scope :- #{Variable}
      function])
 
 (s/defn constraint [scope function]
-  (map->Constraint {:scope scope :function function})
-  )
+  (map->Constraint {:scope scope :function function}))
 
 (s/defn scope [cst]
   (:scope cst))
 
 (s/defn calculate [cst xs]
   ((:function cst) xs))
+
+(s/defn apply-evidence :- Constraint
+  [cst :- Constraint
+   xs]
+  (let [new-scope (->> (scope cst)
+                       (filter (fn [v] (not (contains? (into #{} (keys xs)) (:name v)))  ))
+                       (into #{}))
+        new-fn (fn [m] (calculate cst (merge m xs)))]
+    (map->Constraint {:scope new-scope :function new-fn})))
 
 (s/defn combine :- Constraint
   [sr :- Semiring
@@ -37,6 +47,11 @@
                            (calculate c2 m)))]
     (map->Constraint {:scope new-scope
                       :function new-fn})))
+
+(s/defn combine-all :- Constraint
+  [sr :- Semiring
+   cs :- [Constraint]]
+  (reduce (partial combine sr) cs ))
 
 (s/defn marginalize :- Constraint
   [sr :- Semiring
@@ -52,9 +67,14 @@
                    (reduce op id (map (partial calculate constraint) sub-states))))]
     (map->Constraint {:scope new-scope :function new-fn})))
 
-
 (s/defn marginalize-all :- Constraint
   [sr :- Semiring
    constraint :- Constraint
    vars :- [Variable]]
   (reduce (partial marginalize sr) constraint vars ))
+
+
+(s/defrecord CBIProblem [variables :- [Variable]
+                         domains :-
+                         semiring
+                         constraints])
