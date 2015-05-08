@@ -1,7 +1,6 @@
 (ns king.cbi.ops
   (:require [schema.core :as s]
             [clojure.set :refer [intersection union difference]]
-            [clojure.math.combinatorics :refer [cartesian-product]]
 
             [king.cbi.model.constraints :refer :all]
             [king.cbi.model.variables :refer :all]
@@ -20,12 +19,12 @@
 
 (s/defn apply-evidence :- Constraint
   [cst :- Constraint
-   xs]
-  (let [new-scope (->> (scope cst)
-                       ;; { x \in scope | x \not\in xs }
-                       (filter (fn [v] (not (contains? (into #{} (keys xs)) (:name v)))  ))
+   evidence]
+  (let [new-scope (->> (:scope cst)
+                       ;; { x \in scope | x \not\in evidence }
+                       (filter (fn [v] (not (contains? (into #{} (keys evidence)) (:name v)))))
                        (into #{}))
-        new-fn (fn [m] (calculate cst (merge m xs)))]
+        new-fn (fn [m] (calculate cst (merge m evidence)))]
     (map->Constraint {:scope new-scope :function new-fn})))
 
 (s/defn combine :- Constraint
@@ -33,7 +32,7 @@
    c1 :- Constraint
    c2 :- Constraint]
   (let [op (times sr)
-        new-scope (union (scope c1) (scope c2))
+        new-scope (union (:scope c1) (:scope c2))
         new-fn (fn [m] (op (calculate c1 m)
                            (calculate c2 m)))]
     (map->Constraint {:scope new-scope
@@ -48,10 +47,10 @@
   [sr :- Semiring
    constraint :- Constraint
    var :- Variable]
-  (assert (contains? (scope constraint) var))
+  (assert (contains? (:scope constraint) var))
   (let [op (plus sr)
         id (plus-identity sr)
-        new-scope (difference (scope constraint) #{var})
+        new-scope (difference (:scope constraint) #{var})
         new-fn (fn [m]
                  (let [sub-states (for [s (states var)]
                                     (apply #(merge m %) {(:name var) s}))]
@@ -68,11 +67,7 @@
 ;; constraint
 (s/defn calculate-all-states
   [cst]
-  (let [vars (scope cst)
-        domains (for [v vars]
-                  (for [state (states v)]
-                    {(:name v) state}))
-        assigns (map #(into {} %) (apply cartesian-product domains))]
+  (let [vars (:scope cst)
+        assigns (all-assignments vars)]
     (for [assign assigns]
-      [assign (calculate cst assign)]
-      )))
+      [assign (calculate cst assign)])))

@@ -6,7 +6,9 @@
             [king.cbi.model.variables :refer [make-discrete-domain
                                               variable]]
             [king.cbi.ops :refer :all]
+            [king.cbi.model.cbi-problem :refer :all]
             [king.semirings :refer [times bool-under-or-and]]
+            [king.cbi.algs.ve :refer :all]
             ))
 
 (use-fixtures :once schema.test/validate-schemas)
@@ -36,3 +38,7 @@
                             (bool-marg y)
                             (bool-marg z)
                             ))
+
+(def bool-problem (cbi-problem #{w x y}
+                               bool-under-or-and
+                               #{w-and-x x-and-y}))
