@@ -74,12 +74,12 @@
 (defn rstar? [x]
   (>= x 0))
 
-(def RStarAdd (->Monoid rstar?
+(def r-star-add (->Monoid rstar?
                             +
                             0
                             true))
-(def RStarMult (->Monoid rstar?
+(def r-star-mult (->Monoid rstar?
                          *
                          1
                          true))
-(def RStarUnderAddMult (semiring RStarAdd RStarMult))
+(def r-star-under-add-mult (semiring r-star-add r-star-mult))

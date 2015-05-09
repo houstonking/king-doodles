@@ -8,7 +8,13 @@
   )
 ;; assignment task is a filter over the returned constraint
 (s/defn brute-inference
-  [cbi
+  [cbi({[0 0] 0.5
+                                    [0 1] 0.2
+                                    [0 2] 0.3
+                                    [1 0] 0.1
+                                    [1 1] 0.1
+                                    [1 2] 0.8
+                                    }) [A B] ) ))
    query-vars]
   (let [sr (:semiring cbi)
         nuisances (filter (fn [v] (not (contains? query-vars v)))

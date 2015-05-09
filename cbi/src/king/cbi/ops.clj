@@ -63,6 +63,11 @@
    vars :- [Variable]]
   (reduce (partial marginalize sr) constraint vars ))
 
+
+(s/defn memoize-constraint :- Constraint
+  [cst :- Constraint]
+  ::NYI)
+
 ;; Returns a lazy seq of all [assignment value] pairs for the given
 ;; constraint
 (s/defn calculate-all-states

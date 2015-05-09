@@ -1,6 +1,7 @@
 (ns king.cbi.model.variables
   (:require [schema.core :as s]
             [clojure.math.combinatorics :refer [cartesian-product]]
+            [taoensso.timbre :refer [spy debug]]
             )
   )
 
@@ -26,8 +27,9 @@
 (s/defn all-assignments [vars]
   (let [domains (for [v vars]
                   (for [state (states v)]
-                    {(:name v) state}))
-        assigns (map #(into {} %) (apply cartesian-product domains))]))
+                     {(:name v) state}))
+        assigns (map #(into {} %)  (apply cartesian-product domains))]
+    assigns))
 
 (s/defrecord DiscreteDomain [states])
 

@@ -16,7 +16,7 @@
                          semiring :- Semiring
                          constraints :- #{Constraint}])
 
-(s/defn ^:always-validate cbi-problem [scope :- #{Variable}
+(s/defn cbi-problem [scope :- #{Variable}
                                        semiring :- Semiring
                                        constraints :- #{Constraint}]
   (assert (= scope (apply union (map :scope constraints))))
