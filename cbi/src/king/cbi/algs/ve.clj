@@ -1,20 +1,23 @@
 (ns king.cbi.algs.ve
   (:require [schema.core :as s]
             [clojure.set :refer [difference]]
-            [king.cbi.ops :refer :all]
+            [taoensso.timbre :refer [spy debug]]
+            [king.cbi.model.constraints :refer [marginalize-all
+                                                combine-all]]
+            ))
 
-            )
-
-  )
 ;; assignment task is a filter over the returned constraint
 (s/defn brute-inference
   [cbi
-   query-vars]
+   query-var-names]
   (let [sr (:semiring cbi)
-        nuisances (filter (fn [v] (not (contains? query-vars v)))
-                          (:scope cbi))]
-    (marginalize-all sr
-                     (combine-all sr (:constraints cbi))
+        nuisances (->> (:scope cbi)
+                       ;; { x \in scope | x \not\in evidence }
+                       (filter (fn [v] (not (contains? (into #{} query-var-names) (:name v)))))
+                       (into #{}))
+        _ (spy nuisances)]
+    (marginalize-all
+                     (combine-all (:constraints cbi))
                      nuisances)))
 
 (s/defn variable-elimination
@@ -25,5 +28,4 @@
         nuisances (filter (fn [v] (not (contains? query-vars v)))
                           (:scope cbi))
         ordered-nuis (elim-ordering-fn cbi nuisances)
-        ]
- ))
+        ]))

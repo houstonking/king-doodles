@@ -1,4 +1,4 @@
-(ns king.semirings
+(ns king.cbi.model.semirings
   (:require [schema.core :as s]))
 
 (s/defrecord Semigroup [member?
@@ -66,7 +66,7 @@
                          true
                          ))
 
-(def bool-under-or-and (semiring bool-or bool-and))
+(def or-and-sr (semiring bool-or bool-and))
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -82,4 +82,4 @@
                          *
                          1
                          true))
-(def r-star-under-add-mult (semiring r-star-add r-star-mult))
+(def add-mult-sr (semiring r-star-add r-star-mult))

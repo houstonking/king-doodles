@@ -5,14 +5,14 @@
             )
   )
 
-(s/defrecord Variable [name domain])
+(s/defrecord Variable [name :- s/Keyword
+                       domain :- [s/Any]])
 
 (s/defn variable [name domain]
   (map->Variable {:name name :domain domain}))
 
 (s/defn states [var]
-  (:states (:domain var)))
-
+  (:domain var))
 
 (defmethod print-method Variable
   [o w]
@@ -31,8 +31,18 @@
         assigns (map #(into {} %)  (apply cartesian-product domains))]
     assigns))
 
-(s/defrecord DiscreteDomain [states])
-
-(s/defn make-discrete-domain [states]
-  (map->DiscreteDomain {:states states})
+(s/defn var-name-comparitor
+  [v1 v2]
+  (compare [(:name v1)]
+           [(:name v2)])
   )
+
+(s/defn sorted-var-set
+  [& vars]
+  (apply sorted-set-by var-name-comparitor vars))
+
+;; Returns the set of vars sorted by :name
+(s/defn union-var-sets
+  [vs1
+   vs2]
+  (apply sorted-var-set (concat vs1 vs2)))
