@@ -4,7 +4,8 @@
             [lein-hiera "0.9.0"]
             [lein-cascade "0.1.2"]
             [lein-shell "0.4.0"]]
-  :dependencies [[org.clojure/clojure "1.6.0"]]
+  :dependencies [[org.clojure/clojure "1.6.0"]
+                 [aysylu/loom "0.5.4"]]
   :profiles {:fast {:modules {:subprocesses nil}}
             :warn-reflection {:global-vars {*warn-on-reflection* true}}
             :dev {:aliases
@@ -22,5 +23,6 @@
             :versions {king :version
                        prismatic/schema "0.4.2"
                        prismatic/plumbing "0.4.3"
-                       com.taoensso/timbre "3.4.0"}}
+                       com.taoensso/timbre "3.4.0"
+                       aysylu/loom "0.5.4"}}
   )
