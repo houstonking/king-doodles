@@ -4,4 +4,5 @@
                  [prismatic/schema _]
                  [prismatic/plumbing _]
                  [king/semiring _]
+                 [king/graph _]
                  [org.clojure/math.combinatorics "0.1.1"]])

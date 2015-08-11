@@ -1,19 +1,19 @@
 (ns king.cbi.model.constraints
   (:require [schema.core :as s]
-            [king.cbi.model.variables :refer [states]]
-            [king.semirings :refer [times plus plus-identity]]
+            [king.cbi.model.variables]
+            [king.semirings]
             [taoensso.timbre :refer [spy debug]])
   (:import [king.cbi.model.variables
             Variable]
            [king.semirings
-            Semiring]
-           ))
-
-
+            Semiring]))
 
 (s/defrecord Constraint
     [scope :- #{Variable}
-     function])
+     function]
+  clojure.lang.IFn
+  (invoke [this] (function) )
+  (invoke [this input] (function input)))
 
 (s/defn constraint [scope function]
-  (map->Constraint {:scope scope :function function}))
+  (->Constraint scope function))

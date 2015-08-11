@@ -81,20 +81,24 @@
      )))
 
 (defn clique-tree
-  [digraph ordering]
-  (let [cliques (-> digraph
-                    moralize
-                    (triangulate ordering)
-                    :graph
-                    la/maximal-cliques)
+  ;; TODO: make this work with single clique graphs and connected components
+  [graph ordering]
+  (assert (lg/graph? graph))
+  (let [graph (spy (if (lg/directed? graph)
+                     (moralize graph)
+                     graph))
+        cliques (spy (-> graph
+                         (triangulate ordering)
+                         :graph
+                         la/maximal-cliques))
         ;; two cliques have an edge if they share any nodes
         ;; we weight them by - | overlapping-nodes | so
         ;; we can get the maximum spanning tree using prims
-        c-edges (for [c1 cliques
-                      c2 cliques
-                      :when (and (not= c1 c2)
-                                 (not-empty (intersection c1 c2)))]
-                  [c1 c2 (- (count (intersection c1 c2)))])
+        c-edges (spy (for [c1 cliques
+                           c2 cliques
+                           :when (and (not= c1 c2)
+                                      (not-empty (intersection c1 c2)))]
+                       [c1 c2 (- (count (intersection c1 c2)))]))
         c-graph (reduce
                  (fn add-edge [g e]
                    (lg/add-edges g e))

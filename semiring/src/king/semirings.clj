@@ -1,85 +1,49 @@
 (ns king.semirings
   (:require [schema.core :as s]))
 
-(s/defrecord Semigroup [member?
-                        op
-                        commutative?])
-(s/defrecord Monoid [member?
-                     op
-                     id
-                     commutative?])
-(s/defrecord Group [member?
-                    op
-                    id
-                    inverse
-                    commutative?])
 
-(s/defrecord Semiring [plus-monoid
-                       times-monoid
-                       commutative?])
+(s/defrecord Monoid [id op]
+  clojure.lang.IFn
+  (invoke [this] id)
+  (invoke [this a b] (op a b)))
 
+(s/defn monoid [id op]
+  (->Monoid id op))
 
-(s/defn times [sr]
-  (-> sr
-      :times-monoid
-      :op))
+(s/defrecord Group [id ->inv op]
+  clojure.lang.IFn
+  (invoke [this] id)
+  (invoke [this a] (->inv a))
+  (invoke [this a b] (op a b)))
 
-(s/defn plus [sr]
-  (-> sr
-      :plus-monoid
-      :op))
+(s/defn group [id ->inv op]
+  (->Group id ->inv op))
 
-(s/defn plus-identity [sr]
-  (-> sr
-      :plus-monoid
-      :id)
-  )
+(s/defrecord Semiring [plus times])
+
+(s/defn plus-id [sr]
+  ((:plus sr)))
+
+(s/defn times-id [sr]
+  ((:times sr)))
 
 (s/defrecord K-Semiring [monoids])
 
 (defn semiring [plus times]
-  (let [commutative? (and (:id plus)
-                          (:id times)
-                          (:commutative? plus)
-                          (:commutative? times))]
-    (map->Semiring {:plus-monoid plus
-                    :times-monoid times
-                    :commutative? commutative?})
-    ))
+  (->Semiring plus times))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(defn bool? [x]
-  (= (type x) Boolean))
+(def bool-or (group false not (fn [a b] (or a b))))
 
-(def bool-or (->Group bool?
-                        (fn [x y] (or x y))
-                        false
-                        not
-                        true
-                        ))
-
-(def bool-and (->Group bool?
-                         (fn [x y] (and x y))
-                         true
-                         not
-                         true
-                         ))
+(def bool-and (group true not (fn [a b] (and a b))))
 
 (def bool-under-or-and (semiring bool-or bool-and))
 
-
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(defn rstar? [x]
-  (>= x 0))
+(def r-star-add (monoid 0 +))
 
-(def r-star-add (->Monoid rstar?
-                            +
-                            0
-                            true))
-(def r-star-mult (->Monoid rstar?
-                         *
-                         1
-                         true))
+(def r-star-mult (monoid 1 *))
+
 (def r-star-under-add-mult (semiring r-star-add r-star-mult))
